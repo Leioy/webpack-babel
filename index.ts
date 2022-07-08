@@ -1,15 +1,7 @@
-import { parse } from "@babel/parser"
-import traverse from "@babel/traverse"
-import generate from "@babel/generator"
-
-const code = `let a = 'a'; let b = 2`
-const ast = parse(code)
-traverse(ast, {
-  enter: (item) => {
-    if (item.node.type === "VariableDeclaration" && item.node.kind === "let") {
-      item.node.kind = "var"
-    }
-  },
+import * as babel from "@babel/core"
+import * as fs from "fs"
+const sourceCode = fs.readFileSync("./source.js").toString()
+const result = babel.transformSync(sourceCode, {
+  presets: ["@babel/preset-env"],
 })
-const result = generate(ast, {}, code)
-console.log(result.code)
+fs.writeFileSync("./dist.js", result?.code ?? "")
