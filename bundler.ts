@@ -12,7 +12,7 @@ type DepRelation = DepRelationItem[]
 // 初始化一个空的 depRelation，用于收集依赖
 const depRelation: DepRelation = [] // 数组！
 
-// 将入口文件的绝对路径传入函数，如 project/index.js
+// 将入口文件的绝对路径传入函数，如 D:project/index.js
 collectCodeAndDeps(resolve(projectRoot, "index.js"))
 
 writeFileSync("dist.js", generateCode())
@@ -66,7 +66,18 @@ function collectCodeAndDeps(filepath: string) {
     return
   }
   // 获取文件内容，将内容放至 depRelation
-  const code = readFileSync(filepath).toString()
+  let code = readFileSync(filepath).toString()
+  if (/\.css$/.test(filepath)) {
+    code = `
+      const str = ${JSON.stringify(code)}
+      if(document){
+        const style = document.createElement('style')
+        style.innerHTML = str
+        document.head.appendChild(style)
+      }
+      export default str
+    `
+  }
   const result = babel.transform(code, {
     presets: ["@babel/preset-env"],
   })

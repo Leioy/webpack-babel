@@ -1,12 +1,14 @@
 var depRelation = [{
       key: "index.js", 
-      deps: ["a.js","b.js"],
+      deps: ["a.js","b.js","index.css"],
       code: function(require, module, exports){
         "use strict";
 
 var _a = _interopRequireDefault(require("./a.js"));
 
 var _b = _interopRequireDefault(require("./b.js"));
+
+require("./index.css");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -59,6 +61,27 @@ var b = {
   }
 };
 var _default = b;
+exports["default"] = _default;
+      }
+    },{
+      key: "index.css", 
+      deps: [],
+      code: function(require, module, exports){
+        "use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var str = "body {\n  color: hotpink;\n}";
+
+if (document) {
+  var style = document.createElement('style');
+  style.innerHTML = str;
+  document.head.appendChild(style);
+}
+
+var _default = str;
 exports["default"] = _default;
       }
     }];
