@@ -68,15 +68,7 @@ function collectCodeAndDeps(filepath: string) {
   // 获取文件内容，将内容放至 depRelation
   let code = readFileSync(filepath).toString()
   if (/\.css$/.test(filepath)) {
-    code = `
-      const str = ${JSON.stringify(code)}
-      if(document){
-        const style = document.createElement('style')
-        style.innerHTML = str
-        document.head.appendChild(style)
-      }
-      export default str
-    `
+    code = require("./css-loader.js")(code)
   }
   const result = babel.transform(code, {
     presets: ["@babel/preset-env"],

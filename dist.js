@@ -73,7 +73,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
-var str = "body {\n  color: hotpink;\n}";
+var str = "body {\n  color: plum;\n}";
 
 if (document) {
   var style = document.createElement('style');
