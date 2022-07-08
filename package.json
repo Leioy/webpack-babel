@@ -4,9 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "debug": "esno --inspect-brk index.ts",
+    "start": "esno index.ts"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/generator": "^7.18.7",
+    "@babel/parser": "^7.18.6",
+    "@babel/traverse": "^7.18.6",
+    "@types/babel__generator": "^7.6.4",
+    "@types/babel__traverse": "^7.17.1",
+    "esno": "^0.16.3"
+  }
 }
