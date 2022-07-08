@@ -1,6 +1,6 @@
 import { parse } from "@babel/parser"
 import traverse from "@babel/traverse"
-import { readFileSync } from "fs"
+import { writeFileSync, readFileSync } from "fs"
 import { resolve, relative, dirname } from "path"
 import * as babel from "@babel/core"
 
@@ -10,18 +10,59 @@ const projectRoot = resolve(__dirname, "project")
 type DepRelationItem = { key: string; deps: string[]; code: string }
 type DepRelation = DepRelationItem[]
 // 初始化一个空的 depRelation，用于收集依赖
-const depRelation: DepRelation = []
+const depRelation: DepRelation = [] // 数组！
 
 // 将入口文件的绝对路径传入函数，如 project/index.js
 collectCodeAndDeps(resolve(projectRoot, "index.js"))
 
-console.log(depRelation)
+writeFileSync("dist.js", generateCode())
 console.log("done")
+
+function generateCode() {
+  let code = ""
+  code +=
+    "var depRelation = [" +
+    depRelation
+      .map((item) => {
+        const { key, deps, code } = item
+        return `{
+      key: ${JSON.stringify(key)}, 
+      deps: ${JSON.stringify(deps)},
+      code: function(require, module, exports){
+        ${code}
+      }
+    }`
+      })
+      .join(",") +
+    "];\n"
+  code += "var modules = {};\n"
+  code += `execute(depRelation[0].key)\n`
+  code += `
+  function execute(key) {
+    if (modules[key]) { return modules[key] }
+    var item = depRelation.find(i => i.key === key)
+    if (!item) { throw new Error(\`\${item} is not found\`) }
+    var pathToKey = (path) => {
+      var dirname = key.substring(0, key.lastIndexOf('/') + 1)
+      var projectPath = (dirname + path).replace(\/\\.\\\/\/g, '').replace(\/\\\/\\\/\/, '/')
+      return projectPath
+    }
+    var require = (path) => {
+      return execute(pathToKey(path))
+    }
+    modules[key] = { __esModule: true }
+    var module = { exports: modules[key] }
+    item.code(require, module, module.exports)
+    return modules[key]
+  }
+  `
+  return code
+}
 
 function collectCodeAndDeps(filepath: string) {
   const key = getProjectPath(filepath) // 文件的项目路径，如 index.js
   if (depRelation.find((i) => i.key === key)) {
-    console.warn(`duplicated dependency: ${key}`) // 注意，重复依赖不一定是循环依赖
+    // 注意，重复依赖不一定是循环依赖
     return
   }
   // 获取文件内容，将内容放至 depRelation
@@ -30,12 +71,7 @@ function collectCodeAndDeps(filepath: string) {
     presets: ["@babel/preset-env"],
   })
   // 初始化 depRelation[key]
-  // depRelation[key] = { deps: [], code: result?.code ?? "" }
-  const item: DepRelationItem = {
-    key,
-    deps: [],
-    code: result?.code ?? "",
-  }
+  const item: DepRelationItem = { key, deps: [], code: result?.code ?? "" }
   depRelation.push(item)
   // 将代码转为 AST
   const ast = parse(code, { sourceType: "module" })

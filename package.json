@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "debug": "esno --inspect-brk index.ts",
-    "build": "esno deps.ts"
+    "build": "esno bundler.ts"
   },
   "keywords": [],
   "author": "",
